@@ -1,0 +1,142 @@
+# General Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+
+# Django
+*.log
+*.pot
+*.pyc
+*.sqlite3
+
+# VS Code
+.vscode/
+
+# Node.js
+node_modules/
+
+# Excel Files
+*.xlsx
+*.xls
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+*.swp
+*.swo
+*.tmp
+
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Coverage
+.coverage
+htmlcov/
+
+# Test
+*.test
+*.spec
+
+# Misc
+*.env
+.env
+.env.*
+*.lock
+
+# Existing entries
+backend/core/__pycache__/__init__.cpython-312.pyc
+backend/core/__pycache__/__init__.cpython-313.pyc
+backend/core/__pycache__/settings.cpython-312.pyc
+backend/core/__pycache__/settings.cpython-313.pyc
+backend/core/__pycache__/urls.cpython-312.pyc
+backend/core/__pycache__/urls.cpython-313.pyc
+backend/core/__pycache__/wsgi.cpython-312.pyc
+backend/core/__pycache__/wsgi.cpython-313.pyc
+backend/excel_files/Employee_List_1.xlsx
+backend/excel_files/salary_ct3TvIs.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_1kJrDXP.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_4aVJq5w.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_6SkLBeZ.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_ADkmnFf.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_CfAjdhd.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_CPExabB.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_cWuc89v.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_DvXJ1Z2.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_f6SxYMz.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_f71LfrU.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_FNdNUuJ.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_fo4idFT.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_Ge1Szoi.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_gGjcbYh.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_hVnu8xY.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_Mr8Rad3.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_oeLISsw.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_OVlXwsx.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_PgT6YxE.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_PPL__PCL_3WBpWXm.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_PPL__PCL_6qO0wDE.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_PPL__PCL_092Fsqd.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_PPL__PCL_cXZ4bjv.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_PPL__PCL_f0e9gkW.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_PPL__PCL_Feb_2eMTvN2.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_PPL__PCL_Feb_Un1nAf8.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_PPL__PCL_Feb.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_PPL__PCL_GZQHY2Y.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_PPL__PCL_kiXVkHD.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_PPL__PCL_Mar.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_PPL__PCL_zBqoonu.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_PPL__PCL.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_RTCV8QR.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_SHWgIO2.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_TKFPDL_0JeB1YC.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_TKFPDL_Fg3KVMb.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_TKFPDL_gKfDhm0.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_TKFPDL_jSojwE6.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_TKFPDL_jzT9v7d.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_TKFPDL_KsW6fN4.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_TKFPDL_LlYhweo.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_TKFPDL_SHtT43J.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_TKFPDL_TMFaUdq.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_TKFPDL_u10RpZ9.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_TKFPDL_w0MeMk7.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_TKFPDL.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_vuPIhD7.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_vwTupyR.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_X8jhIhl.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_XASRYKP.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_XBFNEsx.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_y3VagN7.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy_z3Tnwg9.xlsx
+backend/excel_files/Salary_Sheet_2025_All_Master_Copy.xlsx
+backend/excel_files/salary.xlsx
+backend/SalaryInfo/__pycache__/__init__.cpython-312.pyc
+backend/SalaryInfo/__pycache__/__init__.cpython-313.pyc
+backend/SalaryInfo/__pycache__/admin.cpython-312.pyc
+backend/SalaryInfo/__pycache__/admin.cpython-313.pyc
+backend/SalaryInfo/__pycache__/apps.cpython-312.pyc
+backend/SalaryInfo/__pycache__/apps.cpython-313.pyc
+backend/SalaryInfo/__pycache__/filters.cpython-313.pyc
+backend/SalaryInfo/__pycache__/models.cpython-312.pyc
+backend/SalaryInfo/__pycache__/models.cpython-313.pyc
+backend/SalaryInfo/__pycache__/number2text.cpython-313.pyc
+backend/SalaryInfo/__pycache__/PaySlip.cpython-313.pyc
+backend/SalaryInfo/__pycache__/SalaryCertificate.cpython-313.pyc
+backend/SalaryInfo/__pycache__/serializers.cpython-312.pyc
+backend/SalaryInfo/__pycache__/serializers.cpython-313.pyc
+backend/SalaryInfo/__pycache__/urls.cpython-312.pyc
+backend/SalaryInfo/__pycache__/urls.cpython-313.pyc
+backend/SalaryInfo/__pycache__/views.cpython-312.pyc
+backend/SalaryInfo/__pycache__/views.cpython-313.pyc
