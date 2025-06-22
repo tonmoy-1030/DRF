@@ -148,12 +148,14 @@ class UploadViewSet(viewsets.ModelViewSet):
             return Response("No file uploaded", status=400)
 
         try:
-            df = pd.read_excel(excel_file.file, sheet_name=sheet_name)
+            df = pd.read_excel(
+                excel_file.file, sheet_name=sheet_name, dtype={"Employee \nID": str}
+            )
+            print(df.head(10))
             df.columns = df.columns.str.strip().str.replace("\n", "", regex=False)
             df.dropna(subset=["Employee ID", "Name"], inplace=True)
             created_employees, updated_employees = 0, 0
             created_salaries, updated_salaries = 0, 0
-
             employee_map = {}
 
             for _, row in df.iterrows():
