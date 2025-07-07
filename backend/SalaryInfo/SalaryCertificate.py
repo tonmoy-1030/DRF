@@ -86,14 +86,22 @@ def Generate_Salary_Certificate(employee_data):
     flowables.append(Spacer(1, 15))
 
     salary_table_info = [
-        ["Basic Salary", "Tk.", f"{employee_data['Basic Salary']}.00"],
-        ["House Rent", "Tk.", f"{employee_data['House Rent']}.00"],
-        ["Conveyance Allowance", "Tk.", f"{employee_data['Conveyance Allowance']}.00"],
-        ["Medical Allowance", "Tk.", f"{employee_data['Medical Allowance']}.00"],
+        ["Basic Salary", "Tk.", "{:,.2f}".format(employee_data["Basic Salary"])],
+        ["House Rent", "Tk.", "{:,.2f}".format(employee_data["House Rent"])],
+        [
+            "Conveyance Allowance",
+            "Tk.",
+            "{:,.2f}".format(employee_data["Conveyance Allowance"]),
+        ],
+        [
+            "Medical Allowance",
+            "Tk.",
+            "{:,.2f}".format(employee_data["Medical Allowance"]),
+        ],
         [
             "Entertainment Allowance",
             "Tk.",
-            f"{employee_data['Entertainment Allowance']}.00",
+            "{:,.2f}".format(employee_data["Entertainment Allowance"]),
         ],
         ["Gross Salary", "Tk.", f"{employee_data['gross_salary']}.00"],
         [f"Amount in Word: {employee_data['salary_in_words']}", "", " "],
@@ -270,7 +278,7 @@ def Generate_Salary_Certificate_without_deduction(employee_data):
             f"{format_number(int(employee_data['tax']))}.00",
             "Basic Salary",
             "Tk.",
-            f"{employee_data['Basic Salary']}.00",
+            "{:,.2f}".format(employee_data["Basic Salary"]),
         ],
         [
             "Provident fund",
@@ -278,7 +286,7 @@ def Generate_Salary_Certificate_without_deduction(employee_data):
             f"{format_number(int(employee_data['pf']))}.00",
             "House Rent",
             "Tk.",
-            f"{employee_data['House Rent']}.00",
+            "{:,.2f}".format(employee_data["House Rent"]),
         ],
         [
             "Food Consumption",
@@ -286,7 +294,7 @@ def Generate_Salary_Certificate_without_deduction(employee_data):
             f"{format_number(int(employee_data['food']))}.00",
             "Conveyance Allowance",
             "Tk.",
-            f"{employee_data['Conveyance Allowance']}.00",
+            "{:,.2f}".format(employee_data["Conveyance Allowance"]),
         ],
         [
             "Benevolent Fund",
@@ -294,7 +302,7 @@ def Generate_Salary_Certificate_without_deduction(employee_data):
             f"{format_number(int(employee_data['bf']))}.00",
             "Medical Allowance",
             "Tk.",
-            f"{employee_data['Medical Allowance']}.00",
+            "{:,.2f}".format(employee_data["Medical Allowance"]),
         ],
         [
             "Loan",
@@ -302,7 +310,7 @@ def Generate_Salary_Certificate_without_deduction(employee_data):
             f"{format_number(int(employee_data['loan']))}.00",
             "Entertainment Allowance",
             "Tk.",
-            f"{employee_data['Entertainment Allowance']}.00",
+            "{:,.2f}".format(employee_data["Entertainment Allowance"]),
         ],
         [
             "Excess Mobile Bill",

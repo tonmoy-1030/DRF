@@ -280,18 +280,17 @@ class SalaryCertificateAPIView(APIView):
                 float(Salary_Certificate.salary.gross_salary)
             ),
             "salary_in_words": f"{convert_to_words(int(Salary_Certificate.salary.gross_salary))} only",
-            "Basic Salary": format_number(int(Salary_Certificate.salary.basic_salary)),
-            "House Rent": format_number(int(Salary_Certificate.salary.hra)),
-            "Conveyance Allowance": format_number(int(Salary_Certificate.salary.ca)),
-            "Medical Allowance": format_number(int(Salary_Certificate.salary.ma)),
-            "Entertainment Allowance": format_number(int(Salary_Certificate.salary.ea)),
+            "Basic Salary": float(Salary_Certificate.salary.basic_salary),
+            "House Rent": float(Salary_Certificate.salary.hra),
+            "Conveyance Allowance": float(Salary_Certificate.salary.ca),
+            "Medical Allowance": float(Salary_Certificate.salary.ma),
+            "Entertainment Allowance": float(Salary_Certificate.salary.ea),
             "reference": Salary_Certificate.reference_number,
             "issue_date": Salary_Certificate.issue_date,
             "Car Allowance": Salary_Certificate.salary.car_allowance,
             "total_salary": Salary_Certificate.salary.gross_salary,
             "cash": Salary_Certificate.salary.employee.cash_salary,
         }
-
         pdf_bytes = Generate_Salary_Certificate(employee_data)
 
         filename = f"Salary_Certificate_{int(employee_data['reference']):02d}_{employee_data['issue_date'].strftime('%m-%Y')}.pdf"
@@ -317,11 +316,11 @@ class SalaryCertificateWithDeductionAPIView(APIView):
                 float(Salary_Certificate.salary.gross_salary)
             ),
             "salary_in_words": f"{convert_to_words(int(Salary_Certificate.salary.gross_salary))} only",
-            "Basic Salary": format_number(int(Salary_Certificate.salary.basic_salary)),
-            "House Rent": format_number(int(Salary_Certificate.salary.hra)),
-            "Conveyance Allowance": format_number(int(Salary_Certificate.salary.ca)),
-            "Medical Allowance": format_number(int(Salary_Certificate.salary.ma)),
-            "Entertainment Allowance": format_number(int(Salary_Certificate.salary.ea)),
+            "Basic Salary": float(Salary_Certificate.salary.basic_salary),
+            "House Rent": float(Salary_Certificate.salary.hra),
+            "Conveyance Allowance": float(Salary_Certificate.salary.ca),
+            "Medical Allowance": float(Salary_Certificate.salary.ma),
+            "Entertainment Allowance": float(Salary_Certificate.salary.ea),
             "reference": Salary_Certificate.reference_number,
             "issue_date": Salary_Certificate.issue_date,
             "Car Allowance": Salary_Certificate.salary.car_allowance,
@@ -416,11 +415,11 @@ class SalaryPaySlipAPIView(APIView):
                 "department": salary.employee.department,
                 "joining_date": salary.employee.date_of_joining,
                 "gross_salary": format_number(float(salary.gross_salary)),
-                "Basic Salary": format_number(int(salary.basic_salary)),
-                "House Rent": format_number(int(salary.hra)),
-                "Conveyance Allowance": format_number(int(salary.ca)),
-                "Medical Allowance": format_number(int(salary.ma)),
-                "Entertainment Allowance": format_number(int(salary.ea)),
+                "Basic Salary": format_number(salary.basic_salary),
+                "House Rent": format_number(salary.hra),
+                "Conveyance Allowance": format_number(salary.ca),
+                "Medical Allowance": format_number(salary.ma),
+                "Entertainment Allowance": format_number(salary.ea),
                 "Car Allowance": salary.car_allowance,
                 "total_salary": salary.gross_salary,
                 "pf": salary.provident_fund,
@@ -434,7 +433,6 @@ class SalaryPaySlipAPIView(APIView):
                 "net_salary": salary.net_payable(),
                 "cash_salary": salary.employee.cash_salary,
             }
-            print(employee_data["net_salary"])
             Generate_PaySlip(employee_data=employee_data, pdf_path=buffer)
             buffer.seek(0)
             merger.append(buffer)
@@ -449,10 +447,3 @@ class SalaryPaySlipAPIView(APIView):
         response["Content-Disposition"] = f'inline; filename="{filename}"'
 
         return response
-
-
-# views.py
-from .models import ExcelFileProcess
-from .serializers import ExcelFileSerializer
-from rest_framework.decorators import action
-import pandas as pd
