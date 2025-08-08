@@ -151,68 +151,118 @@ class UploadViewSet(viewsets.ModelViewSet):
             df = pd.read_excel(
                 excel_file.file, sheet_name=sheet_name, dtype={"Employee \nID": str}
             )
-            print(df.head(10))
             df.columns = df.columns.str.strip().str.replace("\n", "", regex=False)
             df.dropna(subset=["Employee ID", "Name"], inplace=True)
+
             created_employees, updated_employees = 0, 0
             created_salaries, updated_salaries = 0, 0
             employee_map = {}
+            errors = []
 
-            for _, row in df.iterrows():
-                employee, created = Employee.objects.update_or_create(
-                    EID=row["Employee ID"],
-                    defaults={
-                        "name": row["Name"],
-                        "designation": row.get("Designation", "N/A"),
-                        "department": row.get("Department", "N/A"),
-                        "date_of_joining": row["Date of Joining"],
-                        "business_unit": business_unit,
-                        "company": company,
-                    },
-                )
-                if created:
-                    created_employees += 1
-                else:
-                    updated_employees += 1
-                employee_map[row["Employee ID"]] = employee
+            # Process employees first
+            for index, row in df.iterrows():
+                try:
+                    if not row.get("Date of Joining"):
+                        raise ValueError("Date of Joining is required")
 
-            for _, row in df.iterrows():
-                employee = employee_map.get(row["Employee ID"])
-                if not employee:
-                    continue
-                salary, created = Salary.objects.update_or_create(
-                    employee=employee,
-                    salary_month=salary_month,
-                    defaults={
-                        "gross_salary": row["Gross Salary"],
-                        "payable_days": row["Payable Days"],
-                        "total_payable_salary": row["Total Payable"],
-                        "provident_fund": row["PF"],
-                        "benevolent_fund": row.get("Benevolent Fund", 0),
-                        "tax": row.get("Tax", 0),
-                        "food_consumption": row.get("Food Consumption", 0),
-                        "loan": row.get("Cash, Advanced & Loan", 0),
-                        "exceed_mobile_bill": row.get("Exceed Mobile bill", 0),
-                        "other_deduction": row.get("Others Deduction", 0),
-                        "arrear": row.get("Arrear", 0),
-                        "car_allowance": row.get("Car Expense", 0),
-                    },
-                )
-                if created:
-                    created_salaries += 1
-                else:
-                    updated_salaries += 1
+                    if not isinstance(row.get("Employee ID"), str):
+                        raise ValueError("Employee ID must be a string")
 
-            return Response(
-                {
-                    "message": "File processed successfully.",
-                    "employees_created": created_employees,
-                    "employees_updated": updated_employees,
-                    "salaries_created": created_salaries,
-                    "salaries_updated": updated_salaries,
-                },
-                status=200,
-            )
+                    employee, created = Employee.objects.update_or_create(
+                        EID=row["Employee ID"],
+                        defaults={
+                            "name": row["Name"],
+                            "designation": row.get("Designation", "N/A"),
+                            "department": row.get("Department", "N/A"),
+                            "date_of_joining": row["Date of Joining"],
+                            "business_unit": business_unit,
+                            "company": company,
+                        },
+                    )
+                    if created:
+                        created_employees += 1
+                    else:
+                        updated_employees += 1
+                    employee_map[row["Employee ID"]] = employee
+                except Exception as e:
+                    errors.append(
+                        {
+                            "row": index
+                            + 2,  # Excel rows are 1-based and header is row 1
+                            "employee_id": row.get("Employee ID", "Unknown"),
+                            "error": f"Employee creation failed: {str(e)}",
+                            "type": "employee_error",
+                        }
+                    )
+
+            # Process salaries second
+            for index, row in df.iterrows():
+                try:
+                    employee = employee_map.get(row["Employee ID"])
+                    if not employee:
+                        continue
+
+                    # Validate numeric fields
+                    required_numeric_fields = [
+                        ("Gross Salary", "gross_salary"),
+                        ("Payable Days", "payable_days"),
+                        ("Total Payable", "total_payable_salary"),
+                        ("PF", "provident_fund"),
+                    ]
+
+                    for excel_field, _ in required_numeric_fields:
+                        if pd.isna(row[excel_field]) or not isinstance(
+                            row[excel_field], (int, float)
+                        ):
+                            raise ValueError(f"{excel_field} must be a valid number")
+
+                    salary, created = Salary.objects.update_or_create(
+                        employee=employee,
+                        salary_month=salary_month,
+                        defaults={
+                            "gross_salary": row["Gross Salary"],
+                            "payable_days": row["Payable Days"],
+                            "total_payable_salary": row["Total Payable"],
+                            "provident_fund": row["PF"],
+                            "benevolent_fund": row.get("Benevolent Fund", 0),
+                            "tax": row.get("Tax", 0),
+                            "food_consumption": row.get("Food Consumption", 0),
+                            "loan": row.get("Cash, Advanced & Loan", 0),
+                            "exceed_mobile_bill": row.get("Exceed Mobile bill", 0),
+                            "other_deduction": row.get("Others Deduction", 0),
+                            "arrear": row.get("Arrear", 0),
+                            "car_allowance": row.get("Car Expense", 0),
+                        },
+                    )
+                    if created:
+                        created_salaries += 1
+                    else:
+                        updated_salaries += 1
+                except Exception as e:
+                    errors.append(
+                        {
+                            "row": index
+                            + 2,  # Excel rows are 1-based and header is row 1
+                            "employee_id": row.get("Employee ID", "Unknown"),
+                            "error": f"Salary creation failed: {str(e)}",
+                            "type": "salary_error",
+                        }
+                    )
+
+            response_data = {
+                "message": "File processed with status",
+                "employees_created": created_employees,
+                "employees_updated": updated_employees,
+                "salaries_created": created_salaries,
+                "salaries_updated": updated_salaries,
+                "errors": errors,
+                "status": "success" if not errors else "partial_success",
+            }
+
+            status_code = (
+                200 if not errors else 207
+            )  # Using 207 Multi-Status for partial success
+            return Response(response_data, status=status_code)
 
         except Exception as e:
             return Response({"error": str(e)}, status=400)
