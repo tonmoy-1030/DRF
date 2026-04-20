@@ -132,9 +132,22 @@ class SalaryViewSet(viewsets.ModelViewSet):
         return Response(status=204)
 
 
+from decimal import Decimal, InvalidOperation
+
+
 class UploadViewSet(viewsets.ModelViewSet):
     queryset = ExcelFileProcess.objects.all()
     serializer_class = ExcelFileSerializer
+
+    def clean_decimal(self, value, default=0):
+        """Helper to convert Pandas/Excel values to Django-compatible Decimals."""
+        if pd.isna(value) or value == "":
+            return Decimal(str(default))
+        try:
+            # Convert to string first to maintain precision from float
+            return Decimal(str(value))
+        except (InvalidOperation, ValueError, TypeError):
+            return Decimal(str(default))
 
     @action(detail=True, methods=["post"])
     def sheet_data(self, request, pk=None):
@@ -145,9 +158,10 @@ class UploadViewSet(viewsets.ModelViewSet):
         company = request.data.get("company")
 
         if not excel_file.file:
-            return Response("No file uploaded", status=400)
+            return Response({"error": "No file uploaded"}, status=400)
 
         try:
+            # Load data and clean column names
             df = pd.read_excel(
                 excel_file.file, sheet_name=sheet_name, dtype={"Employee \nID": str}
             )
@@ -159,17 +173,17 @@ class UploadViewSet(viewsets.ModelViewSet):
             employee_map = {}
             errors = []
 
-            # Process employees first
+            # --- Phase 1: Process Employees ---
             for index, row in df.iterrows():
+                row_idx = index + 2  # 1-based index + header row
                 try:
                     if not row.get("Date of Joining"):
                         raise ValueError("Date of Joining is required")
 
-                    if not isinstance(row.get("Employee ID"), str):
-                        raise ValueError("Employee ID must be a string")
+                    employee_id = str(row["Employee ID"]).strip()
 
                     employee, created = Employee.objects.update_or_create(
-                        EID=row["Employee ID"],
+                        EID=employee_id,
                         defaults={
                             "name": row["Name"],
                             "designation": row.get("Designation", "N/A"),
@@ -183,55 +197,56 @@ class UploadViewSet(viewsets.ModelViewSet):
                         created_employees += 1
                     else:
                         updated_employees += 1
-                    employee_map[row["Employee ID"]] = employee
+                    employee_map[employee_id] = employee
                 except Exception as e:
                     errors.append(
                         {
-                            "row": index
-                            + 2,  # Excel rows are 1-based and header is row 1
+                            "row": row_idx,
                             "employee_id": row.get("Employee ID", "Unknown"),
-                            "error": f"Employee creation failed: {str(e)}",
+                            "error": f"Employee error: {str(e)}",
                             "type": "employee_error",
                         }
                     )
 
-            # Process salaries second
+            # --- Phase 2: Process Salaries ---
             for index, row in df.iterrows():
+                row_idx = index + 2
+                employee_id = str(row["Employee ID"]).strip()
+                employee = employee_map.get(employee_id)
+
+                if not employee:
+                    continue
+
                 try:
-                    employee = employee_map.get(row["Employee ID"])
-                    if not employee:
-                        continue
-
-                    # Validate numeric fields
-                    required_numeric_fields = [
-                        ("Gross Salary", "gross_salary"),
-                        ("Payable Days", "payable_days"),
-                        ("Total Payable", "total_payable_salary"),
-                        ("PF", "provident_fund"),
-                    ]
-
-                    for excel_field, _ in required_numeric_fields:
-                        if pd.isna(row[excel_field]) or not isinstance(
-                            row[excel_field], (int, float)
-                        ):
-                            raise ValueError(f"{excel_field} must be a valid number")
-
+                    # Perform update_or_create with Decimal conversion
                     salary, created = Salary.objects.update_or_create(
                         employee=employee,
                         salary_month=salary_month,
                         defaults={
-                            "gross_salary": row["Gross Salary"],
-                            "payable_days": row["Payable Days"],
-                            "total_payable_salary": row["Total Payable"],
-                            "provident_fund": row["PF"],
-                            "benevolent_fund": row.get("Benevolent Fund", 0),
-                            "tax": row.get("Tax", 0),
-                            "food_consumption": row.get("Food Consumption", 0),
-                            "loan": row.get("Cash, Advanced & Loan", 0),
-                            "exceed_mobile_bill": row.get("Exceed Mobile bill", 0),
-                            "other_deduction": row.get("Others Deduction", 0),
-                            "arrear": row.get("Arrear", 0),
-                            "car_allowance": row.get("Car Expense", 0),
+                            "gross_salary": self.clean_decimal(row.get("Gross Salary")),
+                            "payable_days": self.clean_decimal(row.get("Payable Days")),
+                            "total_payable_salary": self.clean_decimal(
+                                row.get("Total Payable")
+                            ),
+                            "provident_fund": self.clean_decimal(row.get("PF")),
+                            "benevolent_fund": self.clean_decimal(
+                                row.get("Benevolent Fund")
+                            ),
+                            "tax": self.clean_decimal(row.get("Tax")),
+                            "food_consumption": self.clean_decimal(
+                                row.get("Food Consumption")
+                            ),
+                            "loan": self.clean_decimal(
+                                row.get("Cash, Advanced & Loan")
+                            ),
+                            "exceed_mobile_bill": self.clean_decimal(
+                                row.get("Exceed Mobile bill")
+                            ),
+                            "other_deduction": self.clean_decimal(
+                                row.get("Others Deduction")
+                            ),
+                            "arrear": self.clean_decimal(row.get("Arrear")),
+                            "car_allowance": self.clean_decimal(row.get("Car Expense")),
                         },
                     )
                     if created:
@@ -241,16 +256,15 @@ class UploadViewSet(viewsets.ModelViewSet):
                 except Exception as e:
                     errors.append(
                         {
-                            "row": index
-                            + 2,  # Excel rows are 1-based and header is row 1
-                            "employee_id": row.get("Employee ID", "Unknown"),
-                            "error": f"Salary creation failed: {str(e)}",
+                            "row": row_idx,
+                            "employee_id": employee_id,
+                            "error": f"Salary error: {str(e)}",
                             "type": "salary_error",
                         }
                     )
-
+            print(errors)
             response_data = {
-                "message": "File processed with status",
+                "message": "Processing complete",
                 "employees_created": created_employees,
                 "employees_updated": updated_employees,
                 "salaries_created": created_salaries,
@@ -259,13 +273,10 @@ class UploadViewSet(viewsets.ModelViewSet):
                 "status": "success" if not errors else "partial_success",
             }
 
-            status_code = (
-                200 if not errors else 207
-            )  # Using 207 Multi-Status for partial success
-            return Response(response_data, status=status_code)
+            return Response(response_data, status=200 if not errors else 207)
 
         except Exception as e:
-            return Response({"error": str(e)}, status=400)
+            return Response({"error": f"Critical Failure: {str(e)}"}, status=400)
 
 
 class SalaryCertificateViewSet(viewsets.ModelViewSet):
@@ -385,7 +396,6 @@ class SalaryCertificateWithDeductionAPIView(APIView):
             "total_deduction": int(Salary_Certificate.salary.total_deductions()),
             "cash": Salary_Certificate.salary.employee.cash_salary,
         }
-
         pdf_bytes = Generate_Salary_Certificate_without_deduction(employee_data)
 
         filename = f"Salary_Certificate_{int(employee_data['reference']):02d}_{employee_data['issue_date'].strftime('%m-%Y')}.pdf"
@@ -477,6 +487,7 @@ class SalaryPaySlipAPIView(APIView):
                 "tax": salary.tax,
                 "food": salary.food_consumption,
                 "loan": salary.loan,
+                "arrear": salary.arrear,
                 "exceed_mobile": salary.exceed_mobile_bill,
                 "other_deduction": salary.other_deduction,
                 "total_deduction": salary.total_deductions(),

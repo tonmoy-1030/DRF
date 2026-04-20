@@ -109,6 +109,7 @@ export default function FileUploadForm() {
           >
             <option value="">Select Business Unit</option>
             <option value="Consumer Division">Consumer Division</option>
+            <option value="Pusti Glory">Pusti Glory</option>
             <option value="Prime Pusti Limited">Prime Pusti Limited</option>
             <option value="Prime Cosmetics Limited">
               Prime Cosmetics Limited

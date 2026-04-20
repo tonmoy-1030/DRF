@@ -1,5 +1,6 @@
 from django.db import models
 import django.utils.timezone as timezone
+from decimal import Decimal
 
 
 # Create your models here.
@@ -12,6 +13,10 @@ class Employee(models.Model):
         (
             "T.K. Food Products Distribution Limited",
             "T.K. Food Products Distribution Limited",
+        ),
+        (
+            "Pusti Glory",
+            "Pusti Glory",
         ),
     ]
 
@@ -81,11 +86,13 @@ class Salary(models.Model):
         return self.gross_salary - self.total_deductions() + self.arrear
 
     def save(self, *args, **kwargs):
-        self.basic_salary = self.gross_salary * 0.5
-        self.hra = self.gross_salary * 0.25
-        self.ma = self.gross_salary * 0.10
-        self.ca = self.gross_salary * 0.10
-        self.ea = self.gross_salary * 0.05
+        # FIX: Replace 0.5 with Decimal('0.5') for precise calculation
+        self.basic_salary = self.gross_salary * Decimal("0.50")
+        self.hra = self.gross_salary * Decimal("0.25")
+        self.ma = self.gross_salary * Decimal("0.10")
+        self.ca = self.gross_salary * Decimal("0.10")
+        self.ea = self.gross_salary * Decimal("0.05")
+
         super().save(*args, **kwargs)
 
     def __str__(self):

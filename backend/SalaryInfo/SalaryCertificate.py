@@ -6,6 +6,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import inch
 from .number2text import format_number, convert_to_words
+from decimal import Decimal
 
 
 def Generate_Salary_Certificate(employee_data):
@@ -78,12 +79,27 @@ def Generate_Salary_Certificate(employee_data):
 
     introduce_text = f""" 
     <br/>This is to certify that Mr. {employee_data['name']}, 
-    Employee ID: {employee_data['emp_id']}, has been working {company}, as {employee_data['designation']}, 
-    under the department of {employee_data['department']} since {employee_data['joining_date'].strftime("%d-%b-%Y")}. He is a 
+    Employee ID: {employee_data['emp_id']}, has been working {company}, as {employee_data['designation']} since {employee_data['joining_date'].strftime("%d-%b-%Y")}. He is a 
     permanent employee of the company. His monthly salary is as follows: 
     """
     flowables.append(Paragraph(introduce_text, body_style))
     flowables.append(Spacer(1, 15))
+
+    # Convert all numeric values to float to avoid TypeError
+    # Ensure None values are replaced with 0 before converting to float
+    employee_data["Basic Salary"] = float(employee_data.get("Basic Salary") or 0)
+    employee_data["House Rent"] = float(employee_data.get("House Rent") or 0)
+    employee_data["Conveyance Allowance"] = float(
+        employee_data.get("Conveyance Allowance") or 0
+    )
+    employee_data["Medical Allowance"] = float(
+        employee_data.get("Medical Allowance") or 0
+    )
+    employee_data["Entertainment Allowance"] = float(
+        employee_data.get("Entertainment Allowance") or 0
+    )
+    employee_data["cash"] = float(employee_data.get("cash") or 0)
+    employee_data["Car Allowance"] = float(employee_data.get("Car Allowance") or 0)
 
     salary_table_info = [
         ["Basic Salary", "Tk.", "{:,.2f}".format(employee_data["Basic Salary"])],
@@ -107,9 +123,9 @@ def Generate_Salary_Certificate(employee_data):
         [f"Amount in Word: {employee_data['salary_in_words']}", "", " "],
     ]
 
-    if employee_data["cash"] != None:
-        salary_table_info.insert(
-            6,
+    # Ensure 'Cash Salary' is displayed if available
+    if employee_data.get("cash", 0) > 0:
+        salary_table_info.append(
             [
                 "Cash Salary",
                 "Tk.",
@@ -117,9 +133,9 @@ def Generate_Salary_Certificate(employee_data):
             ],
         )
 
-    if employee_data["Car Allowance"] != 0.00:
-        salary_table_info.insert(
-            7,
+    # Ensure 'Car Allowance' is displayed if available
+    if employee_data.get("Car Allowance", 0) > 0:
+        salary_table_info.append(
             [
                 "Car Allowance",
                 "Tk.",
@@ -127,20 +143,36 @@ def Generate_Salary_Certificate(employee_data):
             ],
         )
 
-        salary_table_info.insert(
-            8,
-            [
-                "Total Salary",
-                "Tk.",
-                f"{format_number(int(employee_data['Car Allowance']) + int(employee_data['total_salary']) + int(employee_data['cash']))}.00",
-            ],
-        )
+    # Calculate and display 'Total Salary' if applicable
+    total_salary = (
+        employee_data["Basic Salary"]
+        + employee_data["House Rent"]
+        + employee_data["Conveyance Allowance"]
+        + employee_data["Medical Allowance"]
+        + employee_data["Entertainment Allowance"]
+        + employee_data["cash"]
+        + employee_data["Car Allowance"]
+    )
 
-        salary_table_info[9] = [
-            f"Amount in Word: {convert_to_words(int(employee_data['Car Allowance']) + int(employee_data['total_salary']) + int(employee_data['cash']))} only",
-            "",
-            " ",
-        ]
+    salary_table_info.append(
+        [
+            "Total Salary",
+            "Tk.",
+            f"{format_number(int(total_salary))}.00",
+        ],
+    )
+
+    # Update amount in words
+    amount_in_words_text = f"{convert_to_words(int(total_salary))} only"
+
+    salary_table_info = [
+        row
+        for row in salary_table_info
+        if not (
+            row and isinstance(row[0], str) and row[0].startswith("Amount in Word:")
+        )
+    ]
+    salary_table_info.append([f"Amount in Word: {amount_in_words_text}", "", " "])
 
     col_widths = [3.5 * inch, 0.5 * inch, 2 * inch]
     emp_info_row_heights = [0.4 * inch] * len(salary_table_info)
@@ -180,7 +212,7 @@ def Generate_Salary_Certificate(employee_data):
                 <b>
                 _________________________<br/>
                 Abdullah -Al- Momen Mollah <br/>
-                Manager, HR & Admin<br/>
+                Senior Manager, HR & Admin<br/>
                 T.K. Group </b>
                 """
 
@@ -264,8 +296,7 @@ def Generate_Salary_Certificate_without_deduction(employee_data):
 
     introduce_text = f""" 
     <br/>This is to certify that Mr. {employee_data['name']}, 
-    Employee ID: {employee_data['emp_id']}, has been working {company}, as {employee_data['designation']}, 
-    under the department of {employee_data['department']} since {employee_data['joining_date'].strftime("%d-%b-%Y")}. He is a 
+    Employee ID: {employee_data['emp_id']}, has been working {company}, as {employee_data['designation']} since {employee_data['joining_date'].strftime("%d-%b-%Y")}. He is a 
     permanent employee of the company. His monthly salary is as follows: 
     """
     flowables.append(Paragraph(introduce_text, body_style))
@@ -339,6 +370,8 @@ def Generate_Salary_Certificate_without_deduction(employee_data):
         [f"Amount in Word: {employee_data['salary_in_words']}", "", " "],
     ]
 
+    amount_in_words_text = employee_data["salary_in_words"]
+
     if employee_data["Car Allowance"] != 0.00:
         salary_table_info.insert(
             8,
@@ -364,11 +397,16 @@ def Generate_Salary_Certificate_without_deduction(employee_data):
             ],
         )
 
-        salary_table_info[10] = [
-            f"Amount in Word: {convert_to_words(int(employee_data['Car Allowance']) + int(employee_data['total_salary']))} only",
-            "",
-            " ",
-        ]
+        amount_in_words_text = f"{convert_to_words(int(employee_data['Car Allowance']) + int(employee_data['total_salary']))} only"
+
+    salary_table_info = [
+        row
+        for row in salary_table_info
+        if not (
+            row and isinstance(row[0], str) and row[0].startswith("Amount in Word:")
+        )
+    ]
+    salary_table_info.append([f"Amount in Word: {amount_in_words_text}", "", " "])
 
     col_widths = [
         1.4 * inch,
@@ -418,7 +456,7 @@ def Generate_Salary_Certificate_without_deduction(employee_data):
                 <b>
                 _________________________<br/>
                 Abdullah -Al- Momen Mollah <br/>
-                Manager, HR & Admin<br/>
+                Senior Manager, HR & Admin<br/>
                 T.K. Group </b>
                 """
 

@@ -126,13 +126,28 @@ def Generate_PaySlip(employee_data, pdf_path):
             "Total deduction",
             "{:,.2f}".format(employee_data["total_deduction"]),
         ],
-        [
-            "-",
-            "-",
-            "Net Salary",
-            "{:,.2f}".format(round(employee_data["net_salary"])),
-        ],
     ]
+
+    if employee_data["arrear"] != 0.00:
+        salary_table_info.insert(
+            9,
+            [
+                "Arrear",
+                "{:,.2f}".format(employee_data["arrear"]),
+                "Net Salary",
+                "{:,.2f}".format(round(employee_data["net_salary"])),
+            ],
+        )
+    else:
+        salary_table_info.insert(
+            9,
+            [
+                "-",
+                "-",
+                "Net Salary",
+                "{:,.2f}".format(round(employee_data["net_salary"])),
+            ],
+        )
 
     # if Statement
 
