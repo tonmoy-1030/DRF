@@ -114,6 +114,7 @@ export default function FileUploadForm() {
             <option value="Prime Cosmetics Limited">
               Prime Cosmetics Limited
             </option>
+            <option value="T.K. Logistics">T.K. Logistics</option>
             <option value="T.K. Food Products Distribution Limited">
               T.K. Food Products Distribution Limited
             </option>

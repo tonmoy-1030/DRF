@@ -102,6 +102,7 @@ def Generate_Salary_Certificate(employee_data):
     employee_data["Car Allowance"] = float(employee_data.get("Car Allowance") or 0)
 
     salary_table_info = [
+        ["Particulars", "", "Amount"],
         ["Basic Salary", "Tk.", "{:,.2f}".format(employee_data["Basic Salary"])],
         ["House Rent", "Tk.", "{:,.2f}".format(employee_data["House Rent"])],
         [
@@ -154,16 +155,23 @@ def Generate_Salary_Certificate(employee_data):
         + employee_data["Car Allowance"]
     )
 
-    salary_table_info.append(
-        [
-            "Total Salary",
-            "Tk.",
-            f"{format_number(int(total_salary))}.00",
-        ],
-    )
+    has_extra = employee_data["cash"] > 0 or employee_data["Car Allowance"] > 0
+
+    if has_extra:
+        salary_table_info.append(
+            [
+                "Total Salary",
+                "Tk.",
+                f"{format_number(int(total_salary))}.00",
+            ],
+        )
 
     # Update amount in words
-    amount_in_words_text = f"{convert_to_words(int(total_salary))} only"
+    amount_in_words_text = (
+        f"{convert_to_words(int(total_salary))} only"
+        if has_extra
+        else employee_data["salary_in_words"]
+    )
 
     salary_table_info = [
         row
@@ -190,7 +198,10 @@ def Generate_Salary_Certificate(employee_data):
             ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
             ("FONT", (0, 0), (-1, -1), "Times-Roman"),
             ("FONTSIZE", (0, 0), (-1, -1), 12),
+            ("FONT", (0, 0), (-1, 0), "Times-Bold"),
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#D9E2F3")),
             ("SPAN", (0, -1), (-1, -1)),
+            ("FONT", (0, 6), (-1, 6), "Times-Bold"),
             ("FONT", (0, -2), (-1, -2), "Times-Bold"),
             ("FONT", (0, -1), (-1, -1), "Times-Bold"),
             ("BOX", (0, 0), (-1, -1), 0.5, colors.black),
@@ -211,8 +222,8 @@ def Generate_Salary_Certificate(employee_data):
     signature = """<br/><br/><br/>
                 <b>
                 _________________________<br/>
-                Abdullah -Al- Momen Mollah <br/>
-                Senior Manager, HR & Admin<br/>
+                Tonmoy Hossain <br/>
+                Assistant Manager, HR & Admin<br/>
                 T.K. Group </b>
                 """
 
@@ -302,9 +313,26 @@ def Generate_Salary_Certificate_without_deduction(employee_data):
     flowables.append(Paragraph(introduce_text, body_style))
     flowables.append(Spacer(1, 15))
 
+    # Convert all numeric values to float to avoid TypeError
+    # Ensure None values are replaced with 0 before converting to float
+    employee_data["Basic Salary"] = float(employee_data.get("Basic Salary") or 0)
+    employee_data["House Rent"] = float(employee_data.get("House Rent") or 0)
+    employee_data["Conveyance Allowance"] = float(
+        employee_data.get("Conveyance Allowance") or 0
+    )
+    employee_data["Medical Allowance"] = float(
+        employee_data.get("Medical Allowance") or 0
+    )
+    employee_data["Entertainment Allowance"] = float(
+        employee_data.get("Entertainment Allowance") or 0
+    )
+    employee_data["cash"] = float(employee_data.get("cash") or 0)
+    employee_data["Car Allowance"] = float(employee_data.get("Car Allowance") or 0)
+
     salary_table_info = [
+        ["Deductions", "", "Amount", "Particulars", "", "Amount"],
         [
-            "Less: Tax",
+            "Tax",
             "Tk.",
             f"{format_number(int(employee_data['tax']))}.00",
             "Basic Salary",
@@ -372,32 +400,55 @@ def Generate_Salary_Certificate_without_deduction(employee_data):
 
     amount_in_words_text = employee_data["salary_in_words"]
 
-    if employee_data["Car Allowance"] != 0.00:
-        salary_table_info.insert(
-            8,
-            [
-                "",
-                "",
-                "",
-                "Car Allowance",
-                "Tk.",
-                f"{format_number(int(employee_data['Car Allowance']))}.00",
-            ],
-        )
+    has_extra = employee_data["Car Allowance"] != 0.00 or employee_data["cash"] != 0.00
 
+    if has_extra:
+        insert_idx = 9
+        if employee_data["Car Allowance"] != 0.00:
+            salary_table_info.insert(
+                insert_idx,
+                [
+                    "",
+                    "",
+                    "",
+                    "Car Allowance",
+                    "Tk.",
+                    f"{format_number(int(employee_data['Car Allowance']))}.00",
+                ],
+            )
+            insert_idx += 1
+        if employee_data["cash"] != 0.00:
+            salary_table_info.insert(
+                insert_idx,
+                [
+                    "",
+                    "",
+                    "",
+                    "Cash Salary",
+                    "Tk.",
+                    f"{format_number(int(employee_data['cash']))}.00",
+                ],
+            )
+            insert_idx += 1
+
+        total = (
+            int(employee_data["total_salary"])
+            + int(employee_data["cash"])
+            + int(employee_data["Car Allowance"])
+        )
         salary_table_info.insert(
-            9,
+            insert_idx,
             [
                 "",
                 "",
                 "",
                 "Total Salary",
                 "Tk.",
-                f"{format_number(int(employee_data['Car Allowance']) + int(employee_data['total_salary']))}.00",
+                f"{format_number(total)}.00",
             ],
         )
 
-        amount_in_words_text = f"{convert_to_words(int(employee_data['Car Allowance']) + int(employee_data['total_salary']))} only"
+        amount_in_words_text = f"{convert_to_words(total)} only"
 
     salary_table_info = [
         row
@@ -433,10 +484,12 @@ def Generate_Salary_Certificate_without_deduction(employee_data):
             ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
             ("FONT", (0, 0), (-1, -1), "Times-Roman"),
             ("FONTSIZE", (0, 0), (-1, -1), 12),
+            ("FONT", (0, 0), (-1, 0), "Times-Bold"),
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#D9E2F3")),
             ("SPAN", (0, -1), (-1, -1)),
             ("FONT", (0, -2), (-1, -2), "Times-Bold"),
             ("FONT", (0, -1), (-1, -1), "Times-Bold"),
-            ("FONT", (0, 7), (-1, 7), "Times-Bold"),
+            ("FONT", (0, 8), (-1, 8), "Times-Bold"),
             ("BOX", (0, 0), (-1, -1), 0.5, colors.black),
         ]
     )
